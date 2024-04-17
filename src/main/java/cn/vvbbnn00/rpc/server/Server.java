@@ -1,6 +1,8 @@
 package cn.vvbbnn00.rpc.server;
 
 import cn.vvbbnn00.rpc.common.MethodDeclaration;
+import cn.vvbbnn00.rpc.server.base.RpcRunner;
+import cn.vvbbnn00.rpc.server.context.Context;
 import cn.vvbbnn00.rpc.server.model.ConfigurationFile;
 import cn.vvbbnn00.rpc.server.model.PackageNameMap;
 import cn.vvbbnn00.rpc.server.model.ServerConfiguration;
@@ -27,6 +29,7 @@ public class Server {
     private Set<MethodDeclaration> methods;
     private PackageNameMap packageNameMap;
     private final Logger l = Logger.getLogger("Server");
+    private final Context serverContext = new Context();
 
     public Server() {
     }
@@ -72,6 +75,9 @@ public class Server {
         }
         packageNameMap.clear();
         for (ServicePackage sp : configurationFile.getServicePackages()) {
+            if (sp.getAlias() == null) {
+                continue;
+            }
             for (String alia : sp.getAlias()) {
                 packageNameMap.put(alia, sp.getPackageName());
             }
@@ -103,17 +109,39 @@ public class Server {
             l.info("RPC server started on " + serverConfiguration.getHost() + ":" + serverConfiguration.getPort());
             while (true) {
                 Socket socket = serverSocket.accept();
-                new Thread(new ServiceExecutor(methods, socket, packageNameMap)).start();
+                new Thread(new ServiceExecutor(methods, socket, packageNameMap, serverContext)).start();
             }
         } catch (IOException e) {
             Logger.getGlobal().severe(e.getMessage());
         }
     }
 
+    public void startAutoRunClasses() {
+        if (configurationFile.getAutorunClasses() == null) {
+            return;
+        }
+
+        for (String className : configurationFile.getAutorunClasses()) {
+            try {
+                Class<?> clazz = Class.forName(className);
+                RpcRunner instance = (RpcRunner) clazz.getDeclaredConstructor().newInstance();
+                instance.setServerContext(serverContext);
+                
+                new Thread(instance).start();
+            } catch (Exception e) {
+                l.severe("Failed to create instance for class " + className);
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
+    }
+
     public void start() {
         loadConfiguration();
+        serverContext.setAttribute("config", configurationFile);
         loadPackageNameMap();
         loadMethods();
+        startAutoRunClasses();
         startListener();
     }
 

@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
         RpcClient client = new RpcClient("192.168.31.106", 10721);
 
-        IHelloWorld proxy = (IHelloWorld) client.getInterface("helloworld.HelloWorld", new Class[]{IHelloWorld.class});
+        IHelloWorld proxy = (IHelloWorld) client.getInterface("helloworld.HelloWorld", IHelloWorld.class);
         System.out.println(proxy.sayHello());
         System.out.println(proxy.sayHello("World"));
     }

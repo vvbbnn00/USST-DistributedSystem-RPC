@@ -4,6 +4,8 @@ import cn.vvbbnn00.rpc.common.MethodDeclaration;
 import cn.vvbbnn00.rpc.common.message.BasicResponseMessage;
 import cn.vvbbnn00.rpc.common.message.MethodInvocationMessage;
 import cn.vvbbnn00.rpc.common.message.MethodResponseMessage;
+import cn.vvbbnn00.rpc.server.base.RpcHandler;
+import cn.vvbbnn00.rpc.server.context.Context;
 import cn.vvbbnn00.rpc.server.model.PackageNameMap;
 
 import java.io.ObjectInputStream;
@@ -21,7 +23,7 @@ public class ServiceExecutor implements Runnable {
     private final Socket socket;
     private final PackageNameMap packageNameMap;
 
-    public ServiceExecutor(Set<MethodDeclaration> methodDeclarations, Socket socket, PackageNameMap packageNameMap) {
+    public ServiceExecutor(Set<MethodDeclaration> methodDeclarations, Socket socket, PackageNameMap packageNameMap, Context serverContext) {
         this.packageNameMap = packageNameMap;
 
         this.methodDeclarations = methodDeclarations;
@@ -34,7 +36,14 @@ public class ServiceExecutor implements Runnable {
             }
             try {
                 Class<?> clazz = Class.forName(className);
-                instanceMap.put(className, clazz.getDeclaredConstructor().newInstance());
+                Object instance = clazz.getDeclaredConstructor().newInstance();
+                RpcHandler rpcHandler = (RpcHandler) instance;
+
+                // 设置会话上下文
+                rpcHandler.getSessionContext().setAttribute("remoteAddress", socket.getRemoteSocketAddress().toString());
+                rpcHandler.setServerContext(serverContext);
+
+                instanceMap.put(className, instance);
             } catch (Exception e) {
                 l.severe("Failed to create instance for class " + methodDeclaration.getClassName());
                 e.printStackTrace();
@@ -60,15 +69,16 @@ public class ServiceExecutor implements Runnable {
 
         // 调用方法
         try {
-            Object instance = instanceMap.get(methodDeclaration.getClassName());
+            Object instance = instanceMap.get(className);
             Method method = instance.getClass().getDeclaredMethod(methodDeclaration.getMethodName(), methodDeclaration.getParameterTypes());
             method.setAccessible(true);
             Object result = method.invoke(instance, args);
             return new MethodResponseMessage(result, null);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             l.severe("Failed to invoke method " + methodDeclaration + ": " + e.getMessage());
-            e.printStackTrace();
-            return new MethodResponseMessage(null, e);
+            e.getCause().printStackTrace();
+            // 追溯到上一层的异常，因为这里的异常是反射调用方法时抛出的异常
+            return new MethodResponseMessage(null, (Exception) e.getCause());
         }
     }
 

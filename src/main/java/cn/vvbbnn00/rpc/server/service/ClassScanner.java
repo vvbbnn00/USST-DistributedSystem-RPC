@@ -89,6 +89,9 @@ public class ClassScanner {
         }
         int finalMax = max;
         if (maxPackage == null) return null;
+        if (maxPackage.getAlias() == null) {
+            maxPackage.setAlias(new ArrayList<>());
+        }
         List<String> result = new ArrayList<>(maxPackage.getAlias()
                 .stream()
                 .map(alias -> alias + className.substring(finalMax))

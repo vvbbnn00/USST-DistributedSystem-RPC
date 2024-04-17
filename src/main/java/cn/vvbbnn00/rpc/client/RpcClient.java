@@ -16,7 +16,7 @@ public class RpcClient {
         this.registryClient = new RegistryClient(host, port);
     }
 
-    public Object getInterface(String className, Class<?>[] interfaces) {
+    public Object getInterface(String className, Class<?>... interfaces) {
         return Proxy.newProxyInstance(
                 RpcClient.class.getClassLoader(),
                 interfaces,

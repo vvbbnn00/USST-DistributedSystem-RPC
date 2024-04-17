@@ -11,3 +11,9 @@ servicePackages: # 服务包名，会自动扫描包下的子类，寻找带有@
       - 'helloworld' # 别名
     # 是否注册完整包名，若已设置alias，可以不注册完整包名，否则需要注册完整包名
     registerPackageName: false
+  - packageName: 'tech.bzpl.ecard.server'
+    alias:
+      - 'ecard'
+    registerPackageName: false
+autorunClasses: # 启动服务时自动运行的类，按照顺序执行，需要继承 RpcRunner 类
+  - 'tech.bzpl.ecard.server.CialloServerCron'

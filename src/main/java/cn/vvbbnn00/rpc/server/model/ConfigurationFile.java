@@ -9,6 +9,7 @@ public class ConfigurationFile {
     private ServerConfiguration server;
     private RegistryConfiguration registry;
     private List<ServicePackage> servicePackages;
+    private List<String> autorunClasses;
 
     public ConfigurationFile() {
     }
@@ -40,5 +41,13 @@ public class ConfigurationFile {
 
     public void setRegistry(RegistryConfiguration registry) {
         this.registry = registry;
+    }
+
+    public List<String> getAutorunClasses() {
+        return autorunClasses;
+    }
+
+    public void setAutorunClasses(List<String> autorunClasses) {
+        this.autorunClasses = autorunClasses;
     }
 }

@@ -2,9 +2,10 @@ package tech.bzpl.helloworld.server;
 
 import cn.vvbbnn00.rpc.server.annotation.MethodPermission;
 import cn.vvbbnn00.rpc.server.annotation.RpcExposed;
+import cn.vvbbnn00.rpc.server.base.RpcHandler;
 
 @RpcExposed
-public class HelloWorld { // 服务端可以不实现接口
+public class HelloWorld extends RpcHandler { // 服务端可以不实现接口，但是必须继承RpcHandler
     public String sayHello() {
         return "Hello World!";
     }
