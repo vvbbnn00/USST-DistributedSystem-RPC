@@ -1,0 +1,13 @@
+server: # 服务配置
+  host: '0.0.0.0' # 服务地址
+  port: 10722 # 服务端口
+  weight: 1 # 权重
+registry: # 注册中心配置
+  host: '192.168.31.106' # 注册中心地址
+  port: 10721 # 注册中心端口
+servicePackages: # 服务包名，会自动扫描包下的子类，寻找带有@RpcService注解的类
+  - packageName: 'tech.bzpl.helloworld.server' # 完整包名
+    alias: # 别名
+      - 'helloworld' # 别名
+    # 是否注册完整包名，若已设置alias，可以不注册完整包名，否则需要注册完整包名
+    registerPackageName: false
