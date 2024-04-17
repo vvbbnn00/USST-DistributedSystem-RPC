@@ -3,6 +3,7 @@ package cn.vvbbnn00.rpc.registry.service;
 import cn.vvbbnn00.rpc.registry.model.RegistryStorage;
 import cn.vvbbnn00.rpc.registry.model.ServerEndpoint;
 
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -14,8 +15,9 @@ public class RegistryCron implements Runnable {
     private void checkServer() {
         // l.info("[RegistryCron] Checking server...");
         Set<ServerEndpoint> serverEndpointList = RegistryStorage.getAllServers();
+        List<ServerEndpoint> copiedServerList = List.copyOf(serverEndpointList);
 
-        for (ServerEndpoint server : serverEndpointList) {
+        for (ServerEndpoint server : copiedServerList) {
             if (System.currentTimeMillis() - server.getLastHeartbeat() > MAX_TIMEOUT) {
                 l.info("[RegistryCron] Server " + server.getHost() + ":" + server.getPort() + " is offline");
                 RegistryStorage.removeServer(server);

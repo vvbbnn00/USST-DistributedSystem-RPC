@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 public class ServerClient {
     private static final Logger l = Logger.getLogger("ServerClient");
 
-    public static Object remoteCall(ServerEndpoint endpoint, MethodDeclaration method, Object[] args) throws Exception {
+    public static MethodResponseMessage remoteCall(ServerEndpoint endpoint, MethodDeclaration method, Object[] args) throws Exception {
         try (Socket socket = new Socket(endpoint.getHost(), endpoint.getPort())) {
             // Send the method call message
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
@@ -26,11 +26,7 @@ public class ServerClient {
                 throw new RuntimeException(response.getMessage());
             }
 
-            MethodResponseMessage mrm = (MethodResponseMessage) response;
-            if (mrm.getException() != null) {
-                throw mrm.getException();
-            }
-            return mrm.getResult();
+            return (MethodResponseMessage) response;
         }
     }
 }
