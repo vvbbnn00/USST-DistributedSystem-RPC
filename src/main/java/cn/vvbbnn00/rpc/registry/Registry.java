@@ -56,7 +56,7 @@ public class Registry {
         int port = 10721;
 
         if (args.length > 2 || args.length == 1) {
-            System.out.println("Usage: java -jar Registry.jar [host] [port]");
+            System.out.printf("Usage: java %s [host] [port]\n", Registry.class.getName());
             return;
         }
 
